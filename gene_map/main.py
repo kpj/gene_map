@@ -41,10 +41,10 @@ def query(
 
     return df
 
-@click.command()
+@click.command(help='Map gene ids between various formats.')
 @click.option(
     'input_list', '--input', '-i', multiple=True, required=True,
-    help='If it exists, treated as file with newline-separated gene ids. Otherwise treated as a gene id itself.')
+    help='If it exists, treated as file with whitespace-separated gene ids. Otherwise treated as a gene id itself.')
 @click.option(
     'source_id_type', '--from', required=True,
     help='Source ID type.')
