@@ -1,45 +1,128 @@
 import os
-import io
 import sys
+import urllib
 
-from typing import List, Iterator, Optional, TypeVar
+from typing import List, Optional
 
 import click
-import requests
 import pandas as pd
 
-from tqdm import tqdm
 
+class GeneMapper:
+    def __init__(self, data_fname: str = '/tmp/uniprot.dat.gz') -> None:
+        self._ensure_data(data_fname)
+        self.df = pd.read_table(
+            data_fname,
+            header=None, names=['UniProtKB-AC','ID_type','ID'])
 
-MAX_QUERY_LENGTH = 1000
+        self.default_id_type = 'ACC'  # UniProtKB-AC
 
-T = TypeVar('T')
-def chunks(list_: List[T], n: int = MAX_QUERY_LENGTH) -> Iterator[List[T]]:
-    for i in range(0, len(list_), n):
-        yield list_[i:i + n]
+    def _ensure_data(self, fname: str) -> str:
+        """ Check that UniProt mapping data exists and download of not
+        """
+        _url = 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz'
+        if not os.path.exists(fname):
+            print('Caching', fname)
+            urllib.request.urlretrieve(_url, fname)
+        return fname
 
-def query(
-    id_list: List[str],
-    source_id_type: str, target_id_type: str
-) -> pd.DataFrame:
-    _url = 'http://www.uniprot.org/uploadlists/'
+    def get_id_types(self) -> List[str]:
+        """ Return list of all possible ID formats
+        """
+        return ['ACC'] + list(sorted(self.df['ID_type'].unique().tolist()))
 
-    params = {
-        'from': source_id_type,
-        'to': target_id_type,
-        'format': 'tab',
-        'query': ' '.join(id_list)
-    }
+    def query(
+        self,
+        id_list: List[str],
+        source_id_type: str, target_id_type: str
+    ) -> pd.DataFrame:
+        """ Wrapper for all ID conversions
+        """
+        # sanity checks
+        valid_id_formats = self.get_id_types()
+        for id_format in [source_id_type, target_id_type]:
+            if id_format not in valid_id_formats:
+                print(
+                    f'Invalid ID format "{id_format}".\n'
+                    f'Available are: {valid_id_formats}'
+                    , file=sys.stderr)
+                sys.exit(-1)
 
-    resp = requests.get(_url, params=params)
-    resp.raise_for_status()
-    data = resp.text
+        if source_id_type == target_id_type:
+            print('Source ID is target ID, aborting...')
+            sys.exit(-1)
 
-    df = pd.read_table(io.StringIO(data))
-    if df.empty:
-        print('No mappings found, invalid ID types?', file=sys.stderr)
+        # do query
+        if source_id_type == self.default_id_type:
+            return self._convert_from(
+                id_list, target_id_type)
+        elif target_id_type == self.default_id_type:
+            return self._convert_to(
+                id_list, source_id_type)
+        else:
+            return self._convert_inbetween(
+                id_list, source_id_type, target_id_type)
 
-    return df
+    def _convert_from(
+        self, id_list: List[str], target_id_type: str
+    ) -> pd.DataFrame:
+        """ Convert from UniProtKB-AC to any other ID format
+        """
+        df_res = self.df[
+            (self.df['UniProtKB-AC'].isin(id_list))
+            & (self.df['ID_type']==target_id_type)
+        ].reset_index(drop=True)
+
+        df_res = df_res[['UniProtKB-AC','ID']].copy()
+        df_res.rename(columns={
+            'UniProtKB-AC': 'ID_from',
+            'ID': 'ID_to'
+        }, inplace=True)
+
+        return df_res
+
+    def _convert_to(
+        self, id_list: List[str], source_id_type: str
+    ) -> pd.DataFrame:
+        """ Convert from any ID format to UniProtKB-AC
+        """
+        df_res = self.df[
+            (self.df['ID'].isin(id_list))
+            & (self.df['ID_type']==source_id_type)
+        ].reset_index(drop=True)
+
+        df_res = df_res[['ID', 'UniProtKB-AC']].copy()
+        df_res.rename(columns={
+            'UniProtKB-AC': 'ID_to',
+            'ID': 'ID_from'
+        }, inplace=True)
+
+        return df_res
+
+    def _convert_inbetween(
+        self,
+        id_list: List[str],
+        source_id_type: str, target_id_type: str
+    ) -> pd.DataFrame:
+        """ Convert between any two formats
+        """
+        # try naive mapping way: ID_from -> ACC -> ID_to
+        id_acc = self._convert_to(
+            id_list, source_id_type)
+        id_target = self._convert_from(
+            id_acc['ID_to'].tolist(), target_id_type)
+
+        df_res = id_acc.merge(
+            id_target, left_on='ID_to', right_on='ID_from',
+            how='left', suffixes=('_from','_to'))
+
+        df_res = df_res[['ID_from_from','ID_to_to']].copy()
+        df_res.rename(columns={
+            'ID_from_from': 'ID_from',
+            'ID_to_to': 'ID_to'
+        }, inplace=True)
+
+        return df_res
 
 @click.command(help='Map gene ids between various formats.')
 @click.option(
@@ -69,19 +152,8 @@ def main(
             actual_input.append(inp)
 
     # do query
-    result_list = []
-    try:
-        with tqdm(total=len(actual_input)) as pbar:
-            for sub_input in chunks(actual_input):
-                df_sub = query(sub_input, source_id_type, target_id_type)
-                result_list.append(df_sub)
-
-                pbar.update(len(sub_input))
-    except requests.exceptions.HTTPError as ex:
-        print('[ERROR]' + str(ex)[:100] + '...', file=sys.stderr)
-        sys.exit(-1)
-
-    df = pd.concat(result_list)
+    gm = GeneMapper()
+    df = gm.query(actual_input, source_id_type, target_id_type)
 
     # save result
     if output is None:

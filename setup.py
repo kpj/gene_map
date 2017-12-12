@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='gene_map',
-    version='0.1.0',
+    version='0.2.0',
 
     description='Map gene ids using uniprot\'s website.',
 
@@ -28,7 +28,7 @@ setup(
     keywords='vydia video playback',
     packages=find_packages(exclude=['tests']),
 
-    install_requires=['click', 'requests', 'pandas', 'tqdm'],
+    install_requires=['click', 'pandas'],
 
     entry_points={
         'console_scripts': [
