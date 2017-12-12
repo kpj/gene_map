@@ -1,3 +1,4 @@
+import os
 import io
 import sys
 
@@ -33,7 +34,7 @@ def query(
 @click.command()
 @click.option(
     'input_list', '--input', '-i', multiple=True, required=True,
-    help='ID to convert.')
+    help='If it exists, treated as file with newline-separated gene ids. Otherwise treated as a gene id itself.')
 @click.option(
     'source_id_type', '--from', required=True,
     help='Source ID type.')
@@ -48,8 +49,19 @@ def main(
     source_id_type: str, target_id_type: str,
     output: Optional[str]
 ) -> None:
-    df = query(input_list, source_id_type, target_id_type)
+    # parse input
+    actual_input = []
+    for inp in input_list:
+        if os.path.exists(inp):
+            with open(inp) as fd:
+                actual_input.extend(fd.read().split())
+        else:
+            actual_input.append(inp)
 
+    # do query
+    df = query(actual_input, source_id_type, target_id_type)
+
+    # save result
     if output is None:
         df.to_csv(sys.stdout, index=False)
     else:
