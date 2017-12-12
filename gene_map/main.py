@@ -54,14 +54,19 @@ class GeneMapper:
 
         # do query
         if source_id_type == self.default_id_type:
-            return self._convert_from(
+            df_res = self._convert_from(
                 id_list, target_id_type)
         elif target_id_type == self.default_id_type:
-            return self._convert_to(
+            df_res = self._convert_to(
                 id_list, source_id_type)
         else:
-            return self._convert_inbetween(
+            df_res = self._convert_inbetween(
                 id_list, source_id_type, target_id_type)
+
+        # order output
+        df_res = df_res.set_index('ID_from').reindex(id_list)
+
+        return df_res
 
     def _convert_from(
         self, id_list: List[str], target_id_type: str
@@ -157,9 +162,9 @@ def main(
 
     # save result
     if output is None:
-        df.to_csv(sys.stdout, index=False)
+        df.to_csv(sys.stdout)
     else:
-        df.to_csv(output, index=False)
+        df.to_csv(output)
 
 if __name__ == '__main__':
     main()
