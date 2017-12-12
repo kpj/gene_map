@@ -23,6 +23,7 @@ def query(
     }
 
     resp = requests.get(_url, params=params)
+    resp.raise_for_status()
     data = resp.text
 
     df = pd.read_table(io.StringIO(data))
@@ -59,7 +60,11 @@ def main(
             actual_input.append(inp)
 
     # do query
-    df = query(actual_input, source_id_type, target_id_type)
+    try:
+        df = query(actual_input, source_id_type, target_id_type)
+    except requests.exceptions.HTTPError as ex:
+        print('[ERROR]' + str(ex)[:100] + '...')
+        sys.exit(-1)
 
     # save result
     if output is None:
