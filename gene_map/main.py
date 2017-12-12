@@ -71,12 +71,12 @@ def main(
     # do query
     result_list = []
     try:
-        for sub_input in tqdm(
-            chunks(actual_input),
-            total=len(actual_input)//MAX_QUERY_LENGTH
-        ):
-            df_sub = query(sub_input, source_id_type, target_id_type)
-            result_list.append(df_sub)
+        with tqdm(total=len(actual_input)) as pbar:
+            for sub_input in chunks(actual_input):
+                df_sub = query(sub_input, source_id_type, target_id_type)
+                result_list.append(df_sub)
+
+                pbar.update(len(sub_input))
     except requests.exceptions.HTTPError as ex:
         print('[ERROR]' + str(ex)[:100] + '...', file=sys.stderr)
         sys.exit(-1)
