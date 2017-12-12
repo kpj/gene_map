@@ -2,12 +2,21 @@ import os
 import io
 import sys
 
-from typing import List, Optional
+from typing import List, Iterator, Optional, TypeVar
 
 import click
 import requests
 import pandas as pd
 
+from tqdm import tqdm
+
+
+MAX_QUERY_LENGTH = 1000
+
+T = TypeVar('T')
+def chunks(list_: List[T], n: int = MAX_QUERY_LENGTH) -> Iterator[List[T]]:
+    for i in range(0, len(list_), n):
+        yield list_[i:i + n]
 
 def query(
     id_list: List[str],
@@ -28,7 +37,7 @@ def query(
 
     df = pd.read_table(io.StringIO(data))
     if df.empty:
-        print('No mappings found, invalid ID types?')
+        print('No mappings found, invalid ID types?', file=sys.stderr)
 
     return df
 
@@ -60,11 +69,19 @@ def main(
             actual_input.append(inp)
 
     # do query
+    result_list = []
     try:
-        df = query(actual_input, source_id_type, target_id_type)
+        for sub_input in tqdm(
+            chunks(actual_input),
+            total=len(actual_input)//MAX_QUERY_LENGTH
+        ):
+            df_sub = query(sub_input, source_id_type, target_id_type)
+            result_list.append(df_sub)
     except requests.exceptions.HTTPError as ex:
-        print('[ERROR]' + str(ex)[:100] + '...')
+        print('[ERROR]' + str(ex)[:100] + '...', file=sys.stderr)
         sys.exit(-1)
+
+    df = pd.concat(result_list)
 
     # save result
     if output is None:
