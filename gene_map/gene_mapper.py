@@ -79,6 +79,11 @@ class GeneMapper:
 
         return df_res
 
+    def _post_process(self, df: pd.DataFrame) -> pd.DataFrame:
+        """ Clean up given dataframe
+        """
+        return df.dropna().drop_duplicates()
+
     def _convert_from(
         self, id_list: List[str], target_id_type: str
     ) -> pd.DataFrame:
@@ -95,7 +100,7 @@ class GeneMapper:
             'ID': 'ID_to'
         }, inplace=True)
 
-        return df_res
+        return self._post_process(df_res)
 
     def _convert_to(
         self, id_list: List[str], source_id_type: str
@@ -113,7 +118,7 @@ class GeneMapper:
             'ID': 'ID_from'
         }, inplace=True)
 
-        return df_res
+        return self._post_process(df_res)
 
     def _convert_inbetween(
         self,
@@ -138,4 +143,4 @@ class GeneMapper:
             'ID_to_to': 'ID_to'
         }, inplace=True)
 
-        return df_res
+        return self._post_process(df_res)
