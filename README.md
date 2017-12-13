@@ -33,6 +33,8 @@ Options:
 
 ## Getting started
 
+### Commandline usage
+
 Inputs can be either gene ids or files containing whitespace-separated gene ids:
 
 ```bash
@@ -47,4 +49,17 @@ P63244,RACK1
 P08246,ELANE
 P68871,HBB
 P04637,TP53
+```
+
+### API usage
+
+```python
+>>> from gene_map import GeneMapper
+
+>>> gm = GeneMapper()  # defaults to HUMAN_9606
+>>> stringdb_ids = ['9606.ENSP00000306407', '9606.ENSP00000337461']
+>>> gm.query(stringdb_ids, source_id_type='STRING', target_id_type='GeneID')
+#                ID_from  ID_to
+#0  9606.ENSP00000306407  79007
+#1  9606.ENSP00000337461  90529
 ```

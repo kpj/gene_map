@@ -15,7 +15,9 @@ SUPPORTED_ORGANISMS = [
 ]
 
 class GeneMapper:
-    def __init__(self, organism: str, cache_dir: str = '/tmp') -> None:
+    def __init__(
+        self, organism: str = 'HUMAN_9606', cache_dir: str = '/tmp'
+    ) -> None:
         # download data
         assert organism in SUPPORTED_ORGANISMS, \
             f'"{organism}" is not in {SUPPORTED_ORGANISMS}'
