@@ -8,23 +8,36 @@ import click
 import pandas as pd
 
 
+SUPPORTED_ORGANISMS = [
+    'ARATH_3702', 'CAEEL_6239', 'CHICK_9031', 'DANRE_7955', 'DICDI_44689',
+    'DROME_7227', 'ECOLI_83333', 'HUMAN_9606', 'MOUSE_10090', 'RAT_10116',
+    'SCHPO_284812', 'YEAST_559292'
+]
+
 class GeneMapper:
-    def __init__(self, data_fname: str = '/tmp/uniprot.dat.gz') -> None:
-        self._ensure_data(data_fname)
+    def __init__(self, organism: str) -> None:
+        # download data
+        assert organism in SUPPORTED_ORGANISMS, \
+            f'"{organism}" is not in {SUPPORTED_ORGANISMS}'
+        fname = f'{organism}_idmapping.dat.gz'
+        data_path = os.path.join('/tmp', fname)
+        self._ensure_data(fname, data_path)
+
+        # parse data
         self.df = pd.read_table(
-            data_fname,
+            data_path,
             header=None, names=['UniProtKB-AC','ID_type','ID'])
 
         self.default_id_type = 'ACC'  # UniProtKB-AC
 
-    def _ensure_data(self, fname: str) -> str:
+    def _ensure_data(self, remote_file: str, local_file: str) -> str:
         """ Check that UniProt mapping data exists and download of not
         """
-        _url = 'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/HUMAN_9606_idmapping.dat.gz'
-        if not os.path.exists(fname):
-            print('Caching', fname)
-            urllib.request.urlretrieve(_url, fname)
-        return fname
+        _url = f'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/{remote_file}'
+        if not os.path.exists(local_file):
+            print('Caching', local_file)
+            urllib.request.urlretrieve(_url, local_file)
+        return local_file
 
     def get_id_types(self) -> List[str]:
         """ Return list of all possible ID formats
@@ -139,10 +152,13 @@ class GeneMapper:
 @click.option(
     '--output', '-o', default=None,
     help='CSV-file to save result to.')
+@click.option(
+    '--organism', default='HUMAN_9606', type=click.Choice(SUPPORTED_ORGANISMS),
+    help='Organism to convert IDs in.')
 def main(
     input_list: List[str],
     source_id_type: str, target_id_type: str,
-    output: Optional[str]
+    output: Optional[str], organism: str
 ) -> None:
     # parse input
     actual_input = []
@@ -154,7 +170,7 @@ def main(
             actual_input.append(inp)
 
     # do query
-    gm = GeneMapper()
+    gm = GeneMapper(organism)
     df = gm.query(actual_input, source_id_type, target_id_type)
 
     # save result
