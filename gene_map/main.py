@@ -152,7 +152,7 @@ class GeneMapper:
     'target_id_type', '--to', required=True,
     help='Target ID type.')
 @click.option(
-    '--output', '-o', default=None,
+    '--output', '-o', default=None, type=click.File('w'),
     help='CSV-file to save result to.')
 @click.option(
     '--organism', default='HUMAN_9606', type=click.Choice(SUPPORTED_ORGANISMS),
