@@ -15,12 +15,12 @@ SUPPORTED_ORGANISMS = [
 ]
 
 class GeneMapper:
-    def __init__(self, organism: str) -> None:
+    def __init__(self, organism: str, cache_dir: str = '/tmp') -> None:
         # download data
         assert organism in SUPPORTED_ORGANISMS, \
             f'"{organism}" is not in {SUPPORTED_ORGANISMS}'
         fname = f'{organism}_idmapping.dat.gz'
-        data_path = os.path.join('/tmp', fname)
+        data_path = os.path.join(cache_dir, fname)
         self._ensure_data(fname, data_path)
 
         # parse data
@@ -155,10 +155,14 @@ class GeneMapper:
 @click.option(
     '--organism', default='HUMAN_9606', type=click.Choice(SUPPORTED_ORGANISMS),
     help='Organism to convert IDs in.')
+@click.option(
+    '--cache-dir', default='/tmp', type=click.Path(exists=True, file_okay=False),
+    help='Folder to store ID-databases in.')
 def main(
     input_list: List[str],
     source_id_type: str, target_id_type: str,
-    output: Optional[str], organism: str
+    output: Optional[str], organism: str,
+    cache_dir: str
 ) -> None:
     # parse input
     actual_input = []
@@ -170,7 +174,7 @@ def main(
             actual_input.append(inp)
 
     # do query
-    gm = GeneMapper(organism)
+    gm = GeneMapper(organism, cache_dir=cache_dir)
     df = gm.query(actual_input, source_id_type, target_id_type)
 
     # save result
