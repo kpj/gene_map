@@ -79,6 +79,13 @@ class GeneMapper:
 
         return df_res
 
+    def _normalize_uniprot_isoforms(self, ser: pd.Series) -> pd.Series:
+        """ Take into account that UniProt isoforms of P50053
+            have IDs as follows: P50053-1, P50053-2, ...
+            Normalize them so they map to the same ID
+        """
+        return ser.apply(lambda x: x.split('-')[0])
+
     def _post_process(self, df: pd.DataFrame) -> pd.DataFrame:
         """ Clean up given dataframe
         """
@@ -95,6 +102,8 @@ class GeneMapper:
         ].reset_index(drop=True)
 
         df_res = df_res[['UniProtKB-AC','ID']].copy()
+        df_res['UniProtKB-AC'] = self._normalize_uniprot_isoforms(
+            df_res['UniProtKB-AC'])
         df_res.rename(columns={
             'UniProtKB-AC': 'ID_from',
             'ID': 'ID_to'
@@ -113,6 +122,8 @@ class GeneMapper:
         ].reset_index(drop=True)
 
         df_res = df_res[['ID', 'UniProtKB-AC']].copy()
+        df_res['UniProtKB-AC'] = self._normalize_uniprot_isoforms(
+            df_res['UniProtKB-AC'])
         df_res.rename(columns={
             'UniProtKB-AC': 'ID_to',
             'ID': 'ID_from'

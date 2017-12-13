@@ -3,7 +3,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='gene_map',
-    version='0.3.2',
+    version='0.3.3',
 
     description='Map gene ids using uniprot\'s website.',
 
