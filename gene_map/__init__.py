@@ -1,1 +1,2 @@
-from .main import main, GeneMapper
+from .main import main
+from .gene_mapper import GeneMapper
