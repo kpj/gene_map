@@ -28,6 +28,8 @@ class GeneMapper:
         self.df = pd.read_table(
             data_path,
             header=None, names=['UniProtKB-AC','ID_type','ID'])
+        self.df['UniProtKB-AC'] = self._normalize_uniprot_isoforms(
+            self.df['UniProtKB-AC'])
 
         self.default_id_type = 'ACC'  # UniProtKB-AC
 
@@ -102,8 +104,6 @@ class GeneMapper:
         ].reset_index(drop=True)
 
         df_res = df_res[['UniProtKB-AC','ID']].copy()
-        df_res['UniProtKB-AC'] = self._normalize_uniprot_isoforms(
-            df_res['UniProtKB-AC'])
         df_res.rename(columns={
             'UniProtKB-AC': 'ID_from',
             'ID': 'ID_to'
@@ -122,8 +122,6 @@ class GeneMapper:
         ].reset_index(drop=True)
 
         df_res = df_res[['ID', 'UniProtKB-AC']].copy()
-        df_res['UniProtKB-AC'] = self._normalize_uniprot_isoforms(
-            df_res['UniProtKB-AC'])
         df_res.rename(columns={
             'UniProtKB-AC': 'ID_to',
             'ID': 'ID_from'
