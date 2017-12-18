@@ -34,7 +34,7 @@ class GeneMapper:
         self.default_id_type = 'ACC'  # UniProtKB-AC
 
     def _ensure_data(self, remote_file: str, local_file: str) -> str:
-        """ Check that UniProt mapping data exists and download of not
+        """ Check that UniProt mapping data exists and download if not
         """
         _url = f'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/{remote_file}'
         if not os.path.exists(local_file):
