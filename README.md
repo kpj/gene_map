@@ -1,6 +1,6 @@
 # gene_map
 
-[![PyPI](https://img.shields.io/pypi/v/gene_map.svg?style=flat)](https://pypi.python.org/pypi/gene_map)
+[![PyPI](https://img.shields.io/pypi/v/gene_map.svg?style=flat)](https://pypi.python.org/pypi/gene_map) [![Build Status](https://img.shields.io/travis/kpj/gene_map.svg?style=flat)](https://travis-ci.org/kpj/gene_map)
 
 Tool for converting between various gene ids.
 
