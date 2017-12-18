@@ -47,10 +47,7 @@ def main(
     df = gm.query(actual_input, source_id_type, target_id_type)
 
     # save result
-    if output is None:
-        df.to_csv(sys.stdout, index=False)
-    else:
-        df.to_csv(output, index=False)
+    df.to_csv(output or sys.stdout, index=False)
 
 if __name__ == '__main__':
     main()
