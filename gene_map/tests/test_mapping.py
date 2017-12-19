@@ -45,8 +45,8 @@ def test_via_uniprot(gene_mapper):
     id_map = gene_mapper.query(
         id_list, source_id_type='type01', target_id_type='type02')
     assert_frame_equal(id_map, pd.DataFrame({
-        'ID_from': ['foo', 'baz'],
-        'ID_to': ['bar', 'qux']
+        'ID_from': ['baz', 'foo'],
+        'ID_to': ['qux', 'bar']
     }))
 
 def test_invalid_id(gene_mapper):

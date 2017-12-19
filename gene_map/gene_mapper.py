@@ -79,6 +79,10 @@ class GeneMapper:
             df_res = self._convert_inbetween(
                 id_list, source_id_type, target_id_type)
 
+        # sort query
+        df_res.sort_values(by='ID_from', inplace=True)
+        df_res.reset_index(drop=True, inplace=True)
+
         return df_res
 
     def _normalize_uniprot_isoforms(self, ser: pd.Series) -> pd.Series:
