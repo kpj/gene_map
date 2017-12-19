@@ -5,7 +5,7 @@ setup(
     name='gene_map',
     version='0.3.4',
 
-    description='Map gene ids using uniprot\'s website.',
+    description='Map gene ids using UniProt.',
 
     setup_requires=['setuptools-markdown'],
     long_description_markdown_filename='README.md',
