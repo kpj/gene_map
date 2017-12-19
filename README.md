@@ -28,6 +28,7 @@ Options:
   --organism [ARATH_3702|CAEEL_6239|CHICK_9031|DANRE_7955|DICDI_44689|DROME_7227|ECOLI_83333|HUMAN_9606|MOUSE_10090|RAT_10116|SCHPO_284812|YEAST_559292]
                                   Organism to convert IDs in.
   --cache-dir DIRECTORY           Folder to store ID-databases in.
+  -q, --quiet                     Suppress logging of mapping-statistics.
   --help                          Show this message and exit.
 ```
 
