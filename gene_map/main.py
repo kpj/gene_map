@@ -27,11 +27,14 @@ from .gene_mapper import SUPPORTED_ORGANISMS, GeneMapper
 @click.option(
     '--cache-dir', default='/tmp', type=click.Path(exists=True, file_okay=False),
     help='Folder to store ID-databases in.')
+@click.option(
+    '--quiet', '-q', default=False, is_flag=True,
+    help='Suppress logging of mapping-statistics.')
 def main(
     input_list: List[str],
     source_id_type: str, target_id_type: str,
     output: Optional[str], organism: str,
-    cache_dir: str
+    cache_dir: str, quiet: bool
 ) -> None:
     # parse input
     actual_input = []
@@ -45,6 +48,12 @@ def main(
     # do query
     gm = GeneMapper(organism, cache_dir=cache_dir)
     df = gm.query(actual_input, source_id_type, target_id_type)
+
+    # log information
+    if not quiet:
+        input_len = len(actual_input)
+        mapped_input_len = df['ID_from'].unique().size
+        print(f'Mapped {mapped_input_len}/{input_len} genes.', file=sys.stderr)
 
     # save result
     df.to_csv(output or sys.stdout, index=False)
