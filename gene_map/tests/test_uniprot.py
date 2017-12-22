@@ -1,3 +1,5 @@
+import os
+
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
@@ -7,24 +9,32 @@ import gene_map
 
 
 def test_cli():
+    cache_dir = 'cache'
     args = [
         '-i', 'P35222', '-i', 'InvalidID',
         '-i', 'mygenes.txt', '-i', 'P04637',
         '--from', 'ACC', '--to', 'Gene_Name',
-        '-o', 'gene_mapping.csv'
+        '-o', 'gene_mapping.csv',
+        '--cache-dir', cache_dir
     ]
+    cache_fname = f'{cache_dir}/HUMAN_9606_idmapping.dat.gz'
 
     runner = CliRunner()
     with runner.isolated_filesystem():
         with open('mygenes.txt', 'w') as fd:
             fd.write('P63244 P08246\nP68871')
+        os.makedirs(cache_dir)
 
         # run program
         result = runner.invoke(gene_map.main, args)
 
         # test output
         assert result.exit_code == 0
-        assert result.output == 'Mapped 5/6 genes.\n'
+
+        expected_output = f'''Caching {cache_fname}
+Mapped 5/6 genes.
+'''
+        assert result.output == expected_output
 
         df_out = pd.read_csv('gene_mapping.csv')
         assert_frame_equal(df_out, pd.DataFrame({
