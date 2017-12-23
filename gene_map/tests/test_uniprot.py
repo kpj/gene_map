@@ -61,3 +61,26 @@ def test_api():
         'ID_from': stringdb_ids,
         'ID_to': ['79007', '90529']
     }))
+
+def test_nonhuman_genemapping():
+    ecoli_gene = ['ligA']
+
+    gm_hum = gene_map.GeneMapper(
+        organism='HUMAN_9606')
+    gm_ecoli = gene_map.GeneMapper(
+        organism='ECOLI_83333')
+
+    df_hum = gm_hum.query(
+        ecoli_gene,
+        source_id_type='Gene_Name',
+        target_id_type='GeneID')
+    df_ecoli = gm_ecoli.query(
+        ecoli_gene,
+        source_id_type='Gene_Name',
+        target_id_type='GeneID')
+
+    assert df_hum.empty
+    assert_frame_equal(df_ecoli, pd.DataFrame({
+        'ID_from': ecoli_gene,
+        'ID_to': ['946885']
+    }))
