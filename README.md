@@ -42,8 +42,12 @@ Inputs can be either gene ids or files containing whitespace-separated gene ids:
 $ cat mygenes.txt
 P63244 P08246
 P68871
-$ gene_map -i P35222 -i InvalidID -i mygenes.txt -i P04637 --from ACC --to Gene_Name
+$ gene_map \
+    -i P35222 -i InvalidID -i mygenes.txt -i P04637 \
+    --from ACC --to Gene_Name \
+    -o gene_mapping.csv
 Mapped 5/6 genes.
+$ cat gene_mapping.csv
 ID_from,ID_to
 P04637,TP53
 P08246,ELANE
