@@ -46,7 +46,9 @@ def main(
             actual_input.append(inp)
 
     # do query
-    gm = GeneMapper(organism, cache_dir=cache_dir)
+    gm = GeneMapper(
+        organism,
+        cache_dir=cache_dir, verbose=not quiet)
     df = gm.query(actual_input, source_id_type, target_id_type)
 
     # log information

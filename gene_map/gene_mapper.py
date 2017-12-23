@@ -15,8 +15,10 @@ SUPPORTED_ORGANISMS = [
 
 class GeneMapper:
     def __init__(
-        self, organism: str = 'HUMAN_9606', cache_dir: str = '/tmp'
+        self, organism: str = 'HUMAN_9606', cache_dir: str = '/tmp', verbose: bool = True
     ) -> None:
+        self.verbose = verbose
+
         # download data
         assert organism in SUPPORTED_ORGANISMS, \
             f'"{organism}" is not in {SUPPORTED_ORGANISMS}'
@@ -38,7 +40,8 @@ class GeneMapper:
         """
         _url = f'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/{remote_file}'
         if not os.path.exists(local_file):
-            print('Caching', local_file)
+            if self.verbose:
+                print('Caching', local_file)
             urllib.request.urlretrieve(_url, local_file)
         return local_file
 
