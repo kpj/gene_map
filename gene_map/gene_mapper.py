@@ -80,7 +80,7 @@ class GeneMapper:
                 sys.exit(-1)
 
         if source_id_type == target_id_type:
-            print('Source ID is target ID, aborting...')
+            print('Source ID equals target ID, aborting...')
             sys.exit(-1)
 
         # do query
@@ -97,15 +97,14 @@ class GeneMapper:
             # change mapping parameters
             source_id_type = self.default_id_type
 
-            id_list_orig = id_list[:]
+            id_list_orig = list(id_list)
             id_list = list(acc_ids | acc_ids_new)
 
             orig_id_map = pd.concat([
                 acc_ids_res,
                 pd.DataFrame(
                     [(v, v) for v in acc_ids],
-                    columns=['ID_from', 'ID_to'])
-            ])
+                    columns=['ID_from', 'ID_to'])])
 
         if source_id_type == self.default_id_type:
             df_res = self._convert_from(
@@ -118,6 +117,7 @@ class GeneMapper:
                 id_list, source_id_type, target_id_type)
 
         if source_id_type_orig == self.autodetect_id_type:
+            # Reset original ID names
             df_tmp = orig_id_map.merge(
                 df_res, left_on='ID_to', right_on='ID_from')
 
