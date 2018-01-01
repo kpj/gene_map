@@ -56,6 +56,21 @@ P63244,RACK1
 P68871,HBB
 ```
 
+It is also possible to simply try to convert all given inputs without knowing their ID type, by using `--from auto`:
+```bash
+$ gene_map \
+    -i P35222 \
+    -i TP53 \
+    -i '9606.ENSP00000306407' \
+    --from auto \
+    --to GeneID
+Mapped 3/3 genes.
+ID_from,ID_to
+9606.ENSP00000306407,79007
+P35222,1499
+TP53,7157
+```
+
 ### API usage
 
 ```python

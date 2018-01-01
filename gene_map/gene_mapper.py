@@ -34,6 +34,7 @@ class GeneMapper:
             self.df['UniProtKB-AC'])
 
         self.default_id_type = 'ACC'  # UniProtKB-AC
+        self.autodetect_id_type = 'auto'
 
     def _ensure_data(self, remote_file: str, local_file: str) -> str:
         """ Check that UniProt mapping data exists and download if not
@@ -48,7 +49,12 @@ class GeneMapper:
     def get_id_types(self) -> List[str]:
         """ Return list of all possible ID formats
         """
-        return ['ACC'] + list(sorted(self.df['ID_type'].unique().tolist()))
+        uniprot_id_types = list(sorted(
+            self.df['ID_type'].unique().tolist()))
+        return [
+            self.autodetect_id_type,
+            self.default_id_type
+        ] + uniprot_id_types
 
     def query(
         self,
@@ -58,6 +64,12 @@ class GeneMapper:
         """ Wrapper for all ID conversions
         """
         # sanity checks
+        if target_id_type == self.autodetect_id_type:
+            print(
+                'Only `source_id_type` can be set to '
+                f'{self.autodetect_id_type}, aborting...')
+            sys.exit(-1)
+
         valid_id_formats = self.get_id_types()
         for id_format in [source_id_type, target_id_type]:
             if id_format not in valid_id_formats:
@@ -72,6 +84,29 @@ class GeneMapper:
             sys.exit(-1)
 
         # do query
+        source_id_type_orig = source_id_type
+        if source_id_type == self.autodetect_id_type:
+            # If the source id is not given, convert everything
+            # to ACC and follow standard procedure from then on
+            acc_ids = set(id_list) & set(self.df['UniProtKB-AC'])
+
+            acc_ids_res = self._convert_to(
+                list(set(id_list)-acc_ids), source_id_type)
+            acc_ids_new = set(acc_ids_res['ID_to'].tolist())
+
+            # change mapping parameters
+            source_id_type = self.default_id_type
+
+            id_list_orig = id_list[:]
+            id_list = list(acc_ids | acc_ids_new)
+
+            orig_id_map = pd.concat([
+                acc_ids_res,
+                pd.DataFrame(
+                    [(v, v) for v in acc_ids],
+                    columns=['ID_from', 'ID_to'])
+            ])
+
         if source_id_type == self.default_id_type:
             df_res = self._convert_from(
                 id_list, target_id_type)
@@ -82,7 +117,18 @@ class GeneMapper:
             df_res = self._convert_inbetween(
                 id_list, source_id_type, target_id_type)
 
-        # sort query
+        if source_id_type_orig == self.autodetect_id_type:
+            df_tmp = orig_id_map.merge(
+                df_res, left_on='ID_to', right_on='ID_from')
+
+            df_res = df_tmp[['ID_from_x', 'ID_to_y']].copy()
+            df_res.rename(columns={
+                'ID_from_x': 'ID_from',
+                'ID_to_y': 'ID_to'
+            }, inplace=True)
+
+        # sanitize query
+        df_res.drop_duplicates(inplace=True)
         df_res.sort_values(by='ID_from', inplace=True)
         df_res.reset_index(drop=True, inplace=True)
 
@@ -124,8 +170,11 @@ class GeneMapper:
         """ Convert from any ID format to UniProtKB-AC
         """
         df_res = self.df[
-            (self.df['ID'].isin(id_list))
-            & (self.df['ID_type']==source_id_type)
+            (self.df['ID'].isin(id_list)) &
+            (
+                source_id_type == self.autodetect_id_type or
+                self.df['ID_type'] == source_id_type
+            )
         ].reset_index(drop=True)
 
         df_res = df_res[['ID', 'UniProtKB-AC']].copy()

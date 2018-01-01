@@ -12,6 +12,7 @@ def gene_mapper(tmpdir):
     df = pd.DataFrame([
         ('A_ID', 'type01', 'foo'),
         ('A_ID', 'type02', 'bar'),
+        ('A_ID', 'type03', 'fubar'),
         ('B_ID', 'type01', 'baz'),
         ('B_ID-1', 'type02', 'qux'),
     ])
@@ -56,4 +57,13 @@ def test_invalid_id(gene_mapper):
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['foo'],
         'ID_to': ['bar']
+    }))
+
+def test_none_sourceid(gene_mapper):
+    id_list = ['foo', 'qux', 'fubar']
+    id_map = gene_mapper.query(
+        id_list, source_id_type='auto', target_id_type='type02')
+    assert_frame_equal(id_map, pd.DataFrame({
+        'ID_from': ['foo', 'fubar', 'qux'],
+        'ID_to': ['bar', 'bar', 'qux']
     }))
