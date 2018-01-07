@@ -70,6 +70,7 @@ ID_from,ID_to
 P35222,1499
 TP53,7157
 ```
+Attention: if an ID is valid for multiple types, unintended effects may occur.
 
 ### API usage
 
