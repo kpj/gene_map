@@ -71,6 +71,7 @@ P35222,1499
 TP53,7157
 ```
 Attention: if an ID is valid for multiple types, unintended side-effects may occur.
+Furthermore, all IDs are treated as strings.
 
 ### API usage
 

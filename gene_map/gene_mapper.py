@@ -31,7 +31,8 @@ class GeneMapper:
         # parse data
         self.df = pd.read_table(
             data_path,
-            header=None, names=['UniProtKB-AC','ID_type','ID'])
+            header=None, names=['UniProtKB-AC', 'ID_type', 'ID'],
+            dtype={'UniProtKB-AC': str, 'ID_type': str, 'ID': str})
         self.df['UniProtKB-AC'] = self._normalize_uniprot_isoforms(
             self.df['UniProtKB-AC'])
 
@@ -71,6 +72,7 @@ class GeneMapper:
             isinstance(id_list, string_and_binary_types)
         ):
             id_list = [id_list]
+        id_list = [str(id_) for id_ in id_list]
 
         # sanity checks
         if target_id_type == self.autodetect_id_type:

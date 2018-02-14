@@ -15,6 +15,8 @@ def gene_mapper(tmpdir):
         ('A_ID', 'type03', 'fubar'),
         ('B_ID', 'type01', 'baz'),
         ('B_ID-1', 'type02', 'qux'),
+        ('A_ID', 'weirdtype', 13),
+        ('A_ID', 'weirdtype', '42')
     ])
     df.to_csv(
         os.path.join(tmpdir, 'HUMAN_9606_idmapping.dat.gz'),
@@ -78,5 +80,16 @@ def test_argument_types(gene_mapper, test_argument):
         test_argument, source_id_type='type01', target_id_type='type02')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['foo'],
+        'ID_to': ['bar']
+    }))
+
+@pytest.mark.parametrize('test_argument', ['13', 13, '42', 42])
+def test_nonstring_input(gene_mapper, test_argument):
+    id_map = gene_mapper.query(
+        test_argument,
+        source_id_type='weirdtype',
+        target_id_type='type02')
+    assert_frame_equal(id_map, pd.DataFrame({
+        'ID_from': [str(test_argument)],
         'ID_to': ['bar']
     }))
