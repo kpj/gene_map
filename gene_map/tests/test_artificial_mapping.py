@@ -67,3 +67,16 @@ def test_none_sourceid(gene_mapper):
         'ID_from': ['foo', 'fubar', 'qux'],
         'ID_to': ['bar', 'bar', 'qux']
     }))
+
+@pytest.mark.parametrize('test_argument', [
+    'foo',
+    set(['foo', 'INVALID']),
+    ('foo', 'INVALID'),
+])
+def test_argument_types(gene_mapper, test_argument):
+    id_map = gene_mapper.query(
+        test_argument, source_id_type='type01', target_id_type='type02')
+    assert_frame_equal(id_map, pd.DataFrame({
+        'ID_from': ['foo'],
+        'ID_to': ['bar']
+    }))

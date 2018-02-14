@@ -1,10 +1,12 @@
 import os
 import sys
 import urllib
+import collections
 
 from typing import List
 
 import pandas as pd
+from pandas.compat import string_and_binary_types
 
 
 SUPPORTED_ORGANISMS = [
@@ -63,6 +65,13 @@ class GeneMapper:
     ) -> pd.DataFrame:
         """ Wrapper for all ID conversions
         """
+        # usability improvements
+        if (
+            not isinstance(id_list, collections.Iterable) or
+            isinstance(id_list, string_and_binary_types)
+        ):
+            id_list = [id_list]
+
         # sanity checks
         if target_id_type == self.autodetect_id_type:
             print(
