@@ -4,11 +4,11 @@ import pytest
 import pandas as pd
 from pandas.testing import assert_frame_equal
 
-import gene_map
+from ..gene_mapper import GeneMapper
 
 
 @pytest.fixture
-def gene_mapper(tmpdir):
+def gm(tmpdir):
     df = pd.DataFrame([
         ('A_ID', 'type01', 'foo'),
         ('A_ID', 'type02', 'bar'),
@@ -22,48 +22,48 @@ def gene_mapper(tmpdir):
         os.path.join(tmpdir, 'HUMAN_9606_idmapping.dat.gz'),
         sep='\t', compression='gzip')
 
-    gm = gene_map.GeneMapper(cache_dir=tmpdir)
+    gm = GeneMapper(cache_dir=tmpdir)
     return gm
 
-def test_from_uniprot(gene_mapper):
+def test_from_uniprot(gm):
     id_list = ['A_ID', 'B_ID']
-    id_map = gene_mapper.query(
+    id_map = gm.query(
         id_list, source_id_type='ACC', target_id_type='type01')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['A_ID', 'B_ID'],
         'ID_to': ['foo', 'baz']
     }))
 
-def test_to_uniprot(gene_mapper):
+def test_to_uniprot(gm):
     id_list = ['bar', 'qux']
-    id_map = gene_mapper.query(
+    id_map = gm.query(
         id_list, source_id_type='type02', target_id_type='ACC')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['bar', 'qux'],
         'ID_to': ['A_ID', 'B_ID']
     }))
 
-def test_via_uniprot(gene_mapper):
+def test_via_uniprot(gm):
     id_list = ['foo', 'baz']
-    id_map = gene_mapper.query(
+    id_map = gm.query(
         id_list, source_id_type='type01', target_id_type='type02')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['baz', 'foo'],
         'ID_to': ['qux', 'bar']
     }))
 
-def test_invalid_id(gene_mapper):
+def test_invalid_id(gm):
     id_list = ['foo', 'INVALID']
-    id_map = gene_mapper.query(
+    id_map = gm.query(
         id_list, source_id_type='type01', target_id_type='type02')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['foo'],
         'ID_to': ['bar']
     }))
 
-def test_none_sourceid(gene_mapper):
+def test_none_sourceid(gm):
     id_list = ['foo', 'qux', 'fubar']
-    id_map = gene_mapper.query(
+    id_map = gm.query(
         id_list, source_id_type='auto', target_id_type='type02')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['foo', 'fubar', 'qux'],
@@ -75,8 +75,8 @@ def test_none_sourceid(gene_mapper):
     set(['foo', 'INVALID']),
     ('foo', 'INVALID'),
 ])
-def test_argument_types(gene_mapper, test_argument):
-    id_map = gene_mapper.query(
+def test_argument_types(gm, test_argument):
+    id_map = gm.query(
         test_argument, source_id_type='type01', target_id_type='type02')
     assert_frame_equal(id_map, pd.DataFrame({
         'ID_from': ['foo'],
@@ -84,8 +84,8 @@ def test_argument_types(gene_mapper, test_argument):
     }))
 
 @pytest.mark.parametrize('test_argument', ['13', 13, '42', 42])
-def test_nonstring_input(gene_mapper, test_argument):
-    id_map = gene_mapper.query(
+def test_nonstring_input(gm, test_argument):
+    id_map = gm.query(
         test_argument,
         source_id_type='weirdtype',
         target_id_type='type02')

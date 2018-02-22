@@ -5,7 +5,8 @@ from pandas.testing import assert_frame_equal
 
 from click.testing import CliRunner
 
-import gene_map
+from ..main import main
+from ..gene_mapper import GeneMapper
 
 
 def test_cli():
@@ -26,7 +27,7 @@ def test_cli():
         os.makedirs(cache_dir)
 
         # run program
-        result = runner.invoke(gene_map.main, args)
+        result = runner.invoke(main, args)
 
         # test output
         assert result.exit_code == 0
@@ -51,7 +52,7 @@ def test_api():
         '9606.ENSP00000306407',
         '9606.ENSP00000337461']
 
-    gm = gene_map.GeneMapper()
+    gm = GeneMapper()
     df = gm.query(
         stringdb_ids,
         source_id_type='STRING',
@@ -65,9 +66,9 @@ def test_api():
 def test_nonhuman_genemapping():
     ecoli_gene = ['ligA']
 
-    gm_hum = gene_map.GeneMapper(
+    gm_hum = GeneMapper(
         organism='HUMAN_9606')
-    gm_ecoli = gene_map.GeneMapper(
+    gm_ecoli = GeneMapper(
         organism='ECOLI_83333')
 
     df_hum = gm_hum.query(
