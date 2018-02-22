@@ -25,8 +25,9 @@ class GeneMapper:
         self.verbose = verbose
 
         # download data
-        assert organism in SUPPORTED_ORGANISMS, \
-            f'"{organism}" is not in {SUPPORTED_ORGANISMS}'
+        if organism not in SUPPORTED_ORGANISMS:
+            raise RuntimeError(f'"{organism}" is not in {SUPPORTED_ORGANISMS}')
+
         fname = f'{organism}_idmapping.dat.gz'
         data_path = os.path.join(cache_dir, fname)
         self._ensure_data(fname, data_path)

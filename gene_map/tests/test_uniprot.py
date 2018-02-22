@@ -5,6 +5,8 @@ from pandas.testing import assert_frame_equal
 
 from click.testing import CliRunner
 
+import pytest
+
 from ..main import main
 from ..gene_mapper import GeneMapper
 
@@ -85,3 +87,7 @@ def test_nonhuman_genemapping():
         'ID_from': ecoli_gene,
         'ID_to': ['946885']
     }))
+
+def test_invalid_organism():
+    with pytest.raises(RuntimeError):
+        GeneMapper(organism='INVALID_ORGANISM')
