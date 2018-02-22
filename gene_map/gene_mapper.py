@@ -15,9 +15,12 @@ SUPPORTED_ORGANISMS = [
     'SCHPO_284812', 'YEAST_559292'
 ]
 
+
 class GeneMapper:
     def __init__(
-        self, organism: str = 'HUMAN_9606', cache_dir: str = '/tmp', verbose: bool = True
+        self,
+        organism: str = 'HUMAN_9606', cache_dir: str = '/tmp',
+        verbose: bool = True
     ) -> None:
         self.verbose = verbose
 
@@ -42,7 +45,9 @@ class GeneMapper:
     def _ensure_data(self, remote_file: str, local_file: str) -> str:
         """ Check that UniProt mapping data exists and download if not
         """
-        _url = f'ftp://ftp.uniprot.org/pub/databases/uniprot/current_release/knowledgebase/idmapping/by_organism/{remote_file}'
+        _url = ('ftp://ftp.uniprot.org/pub/databases/uniprot/'
+                'current_release/knowledgebase/'
+                f'idmapping/by_organism/{remote_file}')
         if not os.path.exists(local_file):
             if self.verbose:
                 print('Caching', local_file)
@@ -86,8 +91,8 @@ class GeneMapper:
             if id_format not in valid_id_formats:
                 print(
                     f'Invalid ID format "{id_format}".\n'
-                    f'Available are: {valid_id_formats}'
-                    , file=sys.stderr)
+                    f'Available are: {valid_id_formats}',
+                    file=sys.stderr)
                 sys.exit(-1)
 
         if source_id_type == target_id_type:
@@ -108,7 +113,6 @@ class GeneMapper:
             # change mapping parameters
             source_id_type = self.default_id_type
 
-            id_list_orig = list(id_list)
             id_list = list(acc_ids | acc_ids_new)
 
             orig_id_map = pd.concat([
@@ -164,10 +168,10 @@ class GeneMapper:
         """
         df_res = self.df[
             (self.df['UniProtKB-AC'].isin(id_list))
-            & (self.df['ID_type']==target_id_type)
+            & (self.df['ID_type'] == target_id_type)
         ].reset_index(drop=True)
 
-        df_res = df_res[['UniProtKB-AC','ID']].copy()
+        df_res = df_res[['UniProtKB-AC', 'ID']].copy()
         df_res.rename(columns={
             'UniProtKB-AC': 'ID_from',
             'ID': 'ID_to'
@@ -211,9 +215,9 @@ class GeneMapper:
 
         df_res = id_acc.merge(
             id_target, left_on='ID_to', right_on='ID_from',
-            how='left', suffixes=('_from','_to'))
+            how='left', suffixes=('_from', '_to'))
 
-        df_res = df_res[['ID_from_from','ID_to_to']].copy()
+        df_res = df_res[['ID_from_from', 'ID_to_to']].copy()
         df_res.rename(columns={
             'ID_from_from': 'ID_from',
             'ID_to_to': 'ID_to'

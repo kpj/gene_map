@@ -11,7 +11,8 @@ from .gene_mapper import SUPPORTED_ORGANISMS, GeneMapper
 @click.command(help='Map gene ids between various formats.')
 @click.option(
     'input_list', '--input', '-i', multiple=True, required=True,
-    help='If it exists, treated as file with whitespace-separated gene ids. Otherwise treated as a gene id itself.')
+    help=('If it exists, treated as file with whitespace-separated '
+          'gene ids. Otherwise treated as a gene id itself.'))
 @click.option(
     'source_id_type', '--from', required=True,
     help='Source ID type.')
@@ -25,7 +26,8 @@ from .gene_mapper import SUPPORTED_ORGANISMS, GeneMapper
     '--organism', default='HUMAN_9606', type=click.Choice(SUPPORTED_ORGANISMS),
     help='Organism to convert IDs in.')
 @click.option(
-    '--cache-dir', default='/tmp', type=click.Path(exists=True, file_okay=False),
+    '--cache-dir', default='/tmp',
+    type=click.Path(exists=True, file_okay=False),
     help='Folder to store ID-databases in.')
 @click.option(
     '--quiet', '-q', default=False, is_flag=True,
@@ -59,6 +61,7 @@ def main(
 
     # save result
     df.to_csv(output or sys.stdout, index=False)
+
 
 if __name__ == '__main__':
     main()
