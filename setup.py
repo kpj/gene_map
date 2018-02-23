@@ -25,7 +25,7 @@ setup(
         'Programming Language :: Python :: 3 :: Only'
     ],
 
-    keywords='vydia video playback',
+    keywords='uniprot genes mapping',
     packages=find_packages(exclude=['tests']),
 
     install_requires=['click', 'pandas'],

@@ -19,16 +19,21 @@ Usage: gene_map [OPTIONS]
   Map gene ids between various formats.
 
 Options:
-  -i, --input TEXT                If it exists, treated as file with
-                                  whitespace-separated gene ids. Otherwise
-                                  treated as a gene id itself.  [required]
+  -i, --input TEXT                If it exists, treated as file
+                                  with whitespace-separated gene
+                                  ids. Otherwise treated as a
+                                  gene id itself.  [required]
   --from TEXT                     Source ID type.  [required]
   --to TEXT                       Target ID type.  [required]
   -o, --output FILENAME           CSV-file to save result to.
   --organism [ARATH_3702|CAEEL_6239|CHICK_9031|DANRE_7955|DICDI_44689|DROME_7227|ECOLI_83333|HUMAN_9606|MOUSE_10090|RAT_10116|SCHPO_284812|YEAST_559292]
                                   Organism to convert IDs in.
-  --cache-dir DIRECTORY           Folder to store ID-databases in.
-  -q, --quiet                     Suppress logging of mapping-statistics.
+  --cache-dir DIRECTORY           Folder to store ID-databases
+                                  in.
+  -q, --quiet                     Suppress logging of mapping-
+                                  statistics.
+  --force-download                Force download of mapping-
+                                  database.
   --help                          Show this message and exit.
 ```
 

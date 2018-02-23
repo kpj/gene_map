@@ -8,6 +8,8 @@ from typing import List
 import pandas as pd
 from pandas.compat import string_and_binary_types
 
+from .utils import get_data_directory
+
 
 SUPPORTED_ORGANISMS = [
     'ARATH_3702', 'CAEEL_6239', 'CHICK_9031', 'DANRE_7955', 'DICDI_44689',
@@ -19,8 +21,8 @@ SUPPORTED_ORGANISMS = [
 class GeneMapper:
     def __init__(
         self,
-        organism: str = 'HUMAN_9606', cache_dir: str = '/tmp',
-        verbose: bool = True
+        organism: str = 'HUMAN_9606', cache_dir: str = get_data_directory(),
+        verbose: bool = True, force_download: bool = False
     ) -> None:
         self.verbose = verbose
 
@@ -29,8 +31,9 @@ class GeneMapper:
             raise RuntimeError(f'"{organism}" is not in {SUPPORTED_ORGANISMS}')
 
         fname = f'{organism}_idmapping.dat.gz'
+        os.makedirs(cache_dir, exist_ok=True)
         data_path = os.path.join(cache_dir, fname)
-        self._ensure_data(fname, data_path)
+        self._ensure_data(fname, data_path, force_download=force_download)
 
         # parse data
         self.df = pd.read_table(
@@ -43,15 +46,19 @@ class GeneMapper:
         self.default_id_type = 'ACC'  # UniProtKB-AC
         self.autodetect_id_type = 'auto'
 
-    def _ensure_data(self, remote_file: str, local_file: str) -> str:
+    def _ensure_data(
+        self,
+        remote_file: str, local_file: str,
+        force_download: bool = False
+    ) -> str:
         """ Check that UniProt mapping data exists and download if not
         """
         _url = ('ftp://ftp.uniprot.org/pub/databases/uniprot/'
                 'current_release/knowledgebase/'
                 f'idmapping/by_organism/{remote_file}')
-        if not os.path.exists(local_file):
+        if force_download or not os.path.exists(local_file):
             if self.verbose:
-                print('Caching', local_file)
+                print('Downloading to', local_file)
             urllib.request.urlretrieve(_url, local_file)
         return local_file
 
