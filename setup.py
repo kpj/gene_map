@@ -28,7 +28,7 @@ setup(
     keywords='uniprot genes mapping',
     packages=find_packages(exclude=['tests']),
 
-    install_requires=['click', 'pandas'],
+    install_requires=['click', 'pandas', 'appdirs'],
 
     entry_points={
         'console_scripts': [
