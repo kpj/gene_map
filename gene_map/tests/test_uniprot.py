@@ -34,7 +34,7 @@ def test_cli():
         # test output
         assert result.exit_code == 0
 
-        expected_output = f'''Caching {cache_fname}
+        expected_output = f'''Downloading to {cache_fname}
 Mapped 5/6 genes.
 '''
         assert result.output == expected_output
