@@ -58,7 +58,7 @@ class GeneMapper:
                 f'idmapping/by_organism/{remote_file}')
         if force_download or not os.path.exists(local_file):
             if self.verbose:
-                print('Downloading to', local_file)
+                print('Downloading database to', local_file)
             urllib.request.urlretrieve(_url, local_file)
         return local_file
 
