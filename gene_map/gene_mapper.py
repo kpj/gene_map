@@ -3,10 +3,9 @@ import sys
 import urllib
 import collections
 
-from typing import List
+from typing import NewType, List, Union
 
 import pandas as pd
-from pandas.compat import string_and_binary_types
 
 from .utils import get_data_directory
 
@@ -16,6 +15,9 @@ SUPPORTED_ORGANISMS = [
     'DROME_7227', 'ECOLI_83333', 'HUMAN_9606', 'MOUSE_10090', 'RAT_10116',
     'SCHPO_284812', 'YEAST_559292'
 ]
+
+
+GeneID = NewType('GeneID', Union[str, int])
 
 
 class GeneMapper:
@@ -74,7 +76,7 @@ class GeneMapper:
 
     def query(
         self,
-        id_list: List[str],
+        id_list: Union[List[GeneID], GeneID],
         source_id_type: str, target_id_type: str
     ) -> pd.DataFrame:
         """ Wrapper for all ID conversions
@@ -82,7 +84,7 @@ class GeneMapper:
         # usability improvements
         if (
             not isinstance(id_list, collections.Iterable) or
-            isinstance(id_list, string_and_binary_types)
+            isinstance(id_list, str)
         ):
             id_list = [id_list]
         id_list = [str(id_) for id_ in id_list]
