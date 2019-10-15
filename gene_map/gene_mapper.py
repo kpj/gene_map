@@ -18,12 +18,13 @@ SUPPORTED_ORGANISMS = [
 
 
 GeneID = NewType('GeneID', Union[str, int])
+DATA_DIR = get_data_directory()
 
 
 class GeneMapper:
     def __init__(
         self,
-        organism: str = 'HUMAN_9606', cache_dir: str = get_data_directory(),
+        organism: str = 'HUMAN_9606', cache_dir: str = DATA_DIR,
         verbose: bool = True, force_download: bool = False
     ) -> None:
         self.verbose = verbose
@@ -53,8 +54,7 @@ class GeneMapper:
         remote_file: str, local_file: str,
         force_download: bool = False
     ) -> str:
-        """ Check that UniProt mapping data exists and download if not
-        """
+        """Check that UniProt mapping data exists and download if not."""
         _url = ('ftp://ftp.uniprot.org/pub/databases/uniprot/'
                 'current_release/knowledgebase/'
                 f'idmapping/by_organism/{remote_file}')
@@ -65,8 +65,7 @@ class GeneMapper:
         return local_file
 
     def get_id_types(self) -> List[str]:
-        """ Return list of all possible ID formats
-        """
+        """Return list of all possible ID formats."""
         uniprot_id_types = list(sorted(
             self.df['ID_type'].unique().tolist()))
         return [
@@ -79,8 +78,7 @@ class GeneMapper:
         id_list: Union[List[GeneID], GeneID],
         source_id_type: str, target_id_type: str
     ) -> pd.DataFrame:
-        """ Wrapper for all ID conversions
-        """
+        """Handle all ID conversions."""
         # usability improvements
         if (
             not isinstance(id_list, collections.Iterable) or
@@ -160,22 +158,22 @@ class GeneMapper:
         return df_res
 
     def _normalize_uniprot_isoforms(self, ser: pd.Series) -> pd.Series:
-        """ Take into account that UniProt isoforms of P50053
-            have IDs as follows: P50053-1, P50053-2, ...
-            Normalize them so they map to the same ID
+        """Truncate isoforms.
+
+        Take into account that UniProt isoforms of P50053
+        have IDs as follows: P50053-1, P50053-2, ...
+        Normalize them so they map to the same ID
         """
         return ser.apply(lambda x: x.split('-')[0])
 
     def _post_process(self, df: pd.DataFrame) -> pd.DataFrame:
-        """ Clean up given dataframe
-        """
+        """Clean up given dataframe."""
         return df.dropna().drop_duplicates()
 
     def _convert_from(
         self, id_list: List[str], target_id_type: str
     ) -> pd.DataFrame:
-        """ Convert from UniProtKB-AC to any other ID format
-        """
+        """Convert from UniProtKB-AC to any other ID format."""
         df_res = self.df[
             (self.df['UniProtKB-AC'].isin(id_list))
             & (self.df['ID_type'] == target_id_type)
@@ -192,8 +190,7 @@ class GeneMapper:
     def _convert_to(
         self, id_list: List[str], source_id_type: str
     ) -> pd.DataFrame:
-        """ Convert from any ID format to UniProtKB-AC
-        """
+        """Convert from any ID format to UniProtKB-AC."""
         df_res = self.df[
             (self.df['ID'].isin(id_list)) &
             (
@@ -215,8 +212,7 @@ class GeneMapper:
         id_list: List[str],
         source_id_type: str, target_id_type: str
     ) -> pd.DataFrame:
-        """ Convert between any two formats
-        """
+        """Convert between any two formats."""
         # try naive mapping way: ID_from -> ACC -> ID_to
         id_acc = self._convert_to(
             id_list, source_id_type)
