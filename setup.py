@@ -1,14 +1,17 @@
 from setuptools import setup, find_packages
 
 
+with open('README.md', 'r') as fd:
+    readme_content = fd.read()
+
 setup(
     name='gene_map',
     version='0.4.4',
 
     description='Map gene ids using UniProt.',
 
-    setup_requires=['setuptools-markdown'],
-    long_description_markdown_filename='README.md',
+    long_description=readme_content,
+    long_description_content_type='text/markdown',
 
     url='https://github.com/kpj/gene_map',
 
